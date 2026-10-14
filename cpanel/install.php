@@ -2,6 +2,9 @@
 /**
  * Mesa de Ayuda - Instalador
  * Gobierno de Chile
+ * 
+ * IMPORTANTE: En cPanel, la base de datos debe crearse previamente
+ * desde el panel de control (Bases de Datos MySQL).
  */
 
 session_start();
@@ -16,55 +19,104 @@ $success = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($step === 2) {
         // Guardar configuración de BD
-        $db_host = $_POST['db_host'] ?? 'localhost';
-        $db_name = $_POST['db_name'] ?? 'mesadeayuda';
-        $db_user = $_POST['db_user'] ?? '';
+        $db_host = trim($_POST['db_host'] ?? 'localhost');
+        $db_name = trim($_POST['db_name'] ?? '');
+        $db_user = trim($_POST['db_user'] ?? '');
         $db_pass = $_POST['db_pass'] ?? '';
         
-        $_SESSION['db_config'] = [
-            'host' => $db_host,
-            'name' => $db_name,
-            'user' => $db_user,
-            'pass' => $db_pass
-        ];
-        
-        // Probar conexión
-        try {
-            $pdo = new PDO("mysql:host=$db_host", $db_user, $db_pass);
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        // Validar campos
+        if (empty($db_name) || empty($db_user)) {
+            $error = 'Debe completar todos los campos obligatorios.';
+        } else {
+            $_SESSION['db_config'] = [
+                'host' => $db_host,
+                'name' => $db_name,
+                'user' => $db_user,
+                'pass' => $db_pass
+            ];
             
-            // Crear base de datos
-            $pdo->exec("CREATE DATABASE IF NOT EXISTS `$db_name` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-            
-            $step = 3;
-        } catch (PDOException $e) {
-            $error = 'Error de conexión: ' . $e->getMessage();
+            // Probar conexión a la BD (NO crear, solo conectar)
+            try {
+                $pdo = new PDO(
+                    "mysql:host=$db_host;dbname=$db_name;charset=utf8mb4", 
+                    $db_user, 
+                    $db_pass,
+                    [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+                );
+                
+                // Verificar que la BD existe y está accesible
+                $stmt = $pdo->query("SELECT DATABASE()");
+                $currentDb = $stmt->fetchColumn();
+                
+                if ($currentDb !== $db_name) {
+                    $error = "Conexión exitosa pero la base de datos actual ($currentDb) no coincide con la especificada ($db_name).";
+                } else {
+                    $step = 3;
+                }
+                
+            } catch (PDOException $e) {
+                $errorMsg = $e->getMessage();
+                
+                if (strpos($errorMsg, 'Access denied') !== false) {
+                    $error = 'Acceso denegado. Verifique que el usuario y contraseña sean correctos, y que el usuario tenga permisos sobre la base de datos.';
+                } elseif (strpos($errorMsg, 'Unknown database') !== false) {
+                    $error = "La base de datos '$db_name' no existe. Por favor, créela primero desde cPanel → Bases de Datos MySQL.";
+                } elseif (strpos($errorMsg, "Can't connect") !== false || strpos($errorMsg, 'Connection refused') !== false) {
+                    $error = 'No se puede conectar al servidor MySQL. Verifique el host (generalmente es "localhost" en cPanel).';
+                } else {
+                    $error = 'Error de conexión: ' . $errorMsg;
+                }
+            }
         }
     } elseif ($step === 3) {
         // Instalar base de datos
         if (!isset($_SESSION['db_config'])) {
-            $error = 'Configuración de base de datos no encontrada';
+            $error = 'Configuración de base de datos no encontrada. Por favor, vuelva al paso anterior.';
             $step = 2;
         } else {
             try {
                 $config = $_SESSION['db_config'];
-                $pdo = new PDO("mysql:host={$config['host']};dbname={$config['name']}", $config['user'], $config['pass']);
-                $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                $pdo = new PDO(
+                    "mysql:host={$config['host']};dbname={$config['name']};charset=utf8mb4", 
+                    $config['user'], 
+                    $config['pass'],
+                    [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+                );
                 
                 // Leer y ejecutar SQL
                 $sql = file_get_contents(__DIR__ . '/database.sql');
-                $pdo->exec($sql);
+                
+                // Ejecutar cada statement por separado
+                $statements = array_filter(array_map('trim', explode(';', $sql)));
+                
+                foreach ($statements as $statement) {
+                    if (!empty($statement) && !preg_match('/^--/', $statement)) {
+                        try {
+                            $pdo->exec($statement);
+                        } catch (PDOException $e) {
+                            // Ignorar errores de DROP TABLE si no existe
+                            if (strpos($e->getMessage(), 'Unknown table') === false) {
+                                throw $e;
+                            }
+                        }
+                    }
+                }
                 
                 // Crear archivo de configuración
                 $config_content = "<?php\n";
-                $config_content .= "define('DB_HOST', '{$config['host']}');\n";
-                $config_content .= "define('DB_NAME', '{$config['name']}');\n";
-                $config_content .= "define('DB_USER', '{$config['user']}');\n";
-                $config_content .= "define('DB_PASS', '{$config['pass']}');\n";
+                $config_content .= "// Configuración generada automáticamente el " . date('Y-m-d H:i:s') . "\n";
+                $config_content .= "// NO MODIFICAR ESTE ARCHIVO MANUALMENTE\n\n";
+                $config_content .= "define('DB_HOST', '" . addslashes($config['host']) . "');\n";
+                $config_content .= "define('DB_NAME', '" . addslashes($config['name']) . "');\n";
+                $config_content .= "define('DB_USER', '" . addslashes($config['user']) . "');\n";
+                $config_content .= "define('DB_PASS', '" . addslashes($config['pass']) . "');\n";
                 $config_content .= "define('SITE_URL', '" . dirname($_SERVER['REQUEST_URI']) . "');\n";
                 $config_content .= "define('INSTALLED', true);\n";
+                $config_content .= "define('INSTALL_DATE', '" . date('Y-m-d H:i:s') . "');\n";
                 
-                file_put_contents(__DIR__ . '/config.php', $config_content);
+                if (file_put_contents(__DIR__ . '/config.php', $config_content) === false) {
+                    throw new Exception('No se pudo crear el archivo config.php. Verifique los permisos de la carpeta.');
+                }
                 
                 // Marcar como instalado
                 $pdo->exec("UPDATE settings SET value = '1' WHERE key_name = 'installed'");
@@ -77,6 +129,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
             } catch (PDOException $e) {
                 $error = 'Error al instalar base de datos: ' . $e->getMessage();
+            } catch (Exception $e) {
+                $error = $e->getMessage();
             }
         }
     } elseif ($step === 4) {
@@ -116,7 +170,7 @@ if (file_exists(__DIR__ . '/config.php')) {
             background: white;
             border-radius: 16px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 600px;
+            max-width: 650px;
             width: 100%;
             overflow: hidden;
         }
@@ -231,6 +285,22 @@ if (file_exists(__DIR__ . '/config.php')) {
             color: #555;
             line-height: 1.8;
         }
+        .warning-box {
+            background: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .warning-box h3 {
+            color: #f57f17;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .warning-box p {
+            color: #666;
+            line-height: 1.6;
+        }
         .credentials {
             background: #fff8e1;
             border: 2px solid #ffc107;
@@ -247,6 +317,11 @@ if (file_exists(__DIR__ . '/config.php')) {
             padding: 2px 8px;
             border-radius: 4px;
             font-family: 'Courier New', monospace;
+        }
+        .help-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
         }
     </style>
 </head>
@@ -290,6 +365,20 @@ if (file_exists(__DIR__ . '/config.php')) {
                     </ul>
                 </div>
                 
+                <div class="warning-box">
+                    <h3>⚠️ IMPORTANTE: Base de Datos</h3>
+                    <p>
+                        <strong>Antes de continuar, debe crear la base de datos desde cPanel:</strong>
+                    </p>
+                    <ol style="margin-left: 20px; margin-top: 10px; line-height: 2;">
+                        <li>Ingrese a cPanel → <strong>Bases de Datos MySQL</strong></li>
+                        <li>Cree una nueva base de datos (ej: <code>mesadeayuda</code>)</li>
+                        <li>Cree un usuario con contraseña segura</li>
+                        <li>Asigne <strong>TODOS LOS PRIVILEGIOS</strong> al usuario sobre la BD</li>
+                        <li><strong>ANOTE</strong> el nombre completo de la BD (incluye prefijo de cPanel)</li>
+                    </ol>
+                </div>
+                
                 <div class="info-box">
                     <h3>✅ Verificación del Sistema</h3>
                     <ul>
@@ -306,31 +395,41 @@ if (file_exists(__DIR__ . '/config.php')) {
             <?php elseif ($step === 2): ?>
                 <h2 style="margin-bottom: 20px; color: #004A83;">Configuración de Base de Datos</h2>
                 <p style="margin-bottom: 20px; color: #666;">
-                    Ingrese los datos de conexión a su base de datos MySQL.
+                    Ingrese los datos de la base de datos que creó en cPanel.
                 </p>
+                
+                <div class="warning-box">
+                    <h3>💡 Ayuda</h3>
+                    <p>
+                        En cPanel, el nombre de la base de datos incluye un prefijo. Por ejemplo:<br>
+                        Si su usuario de cPanel es <code>cuarzodi</code> y creó la BD <code>mesadeayuda</code>,<br>
+                        el nombre completo será: <code>cuarzodi_mesadeayuda</code>
+                    </p>
+                </div>
                 
                 <form method="POST" action="?step=2">
                     <div class="form-group">
                         <label>Servidor de Base de Datos</label>
                         <input type="text" name="db_host" value="localhost" required>
-                        <small style="color: #999;">Generalmente es "localhost" en cPanel</small>
+                        <p class="help-text">Generalmente es "localhost" en cPanel</p>
                     </div>
                     
                     <div class="form-group">
-                        <label>Nombre de la Base de Datos</label>
-                        <input type="text" name="db_name" value="mesadeayuda" required>
-                        <small style="color: #999;">En cPanel puede ser: usuario_mesadeayuda</small>
+                        <label>Nombre Completo de la Base de Datos *</label>
+                        <input type="text" name="db_name" value="" required placeholder="ej: cuarzodi_mesadeayuda">
+                        <p class="help-text">Incluya el prefijo de cPanel (ej: usuario_mesadeayuda)</p>
                     </div>
                     
                     <div class="form-group">
-                        <label>Usuario de Base de Datos</label>
-                        <input type="text" name="db_user" required>
-                        <small style="color: #999;">Usuario creado en cPanel para la BD</small>
+                        <label>Usuario de Base de Datos *</label>
+                        <input type="text" name="db_user" value="" required placeholder="ej: cuarzodi_mesa_user">
+                        <p class="help-text">Usuario creado en cPanel para la BD (incluye prefijo)</p>
                     </div>
                     
                     <div class="form-group">
-                        <label>Contraseña de Base de Datos</label>
+                        <label>Contraseña de Base de Datos *</label>
                         <input type="password" name="db_pass" required>
+                        <p class="help-text">Contraseña del usuario de la BD</p>
                     </div>
                     
                     <button type="submit" class="btn">Probar Conexión →</button>
@@ -353,6 +452,15 @@ if (file_exists(__DIR__ . '/config.php')) {
                     </ul>
                 </div>
                 
+                <div class="info-box">
+                    <h3>🔗 Conexión verificada</h3>
+                    <ul>
+                        <li>Servidor: <strong><?php echo htmlspecialchars($_SESSION['db_config']['host']); ?></strong></li>
+                        <li>Base de datos: <strong><?php echo htmlspecialchars($_SESSION['db_config']['name']); ?></strong></li>
+                        <li>Usuario: <strong><?php echo htmlspecialchars($_SESSION['db_config']['user']); ?></strong></li>
+                    </ul>
+                </div>
+                
                 <form method="POST" action="?step=3">
                     <button type="submit" class="btn">Instalar Base de Datos →</button>
                 </form>
@@ -370,13 +478,14 @@ if (file_exists(__DIR__ . '/config.php')) {
                     <p><strong>Técnico:</strong> <code>tecnico</code> / <code>admin123</code></p>
                 </div>
                 
-                <div class="info-box">
-                    <h3>⚠️ Importante</h3>
-                    <ul>
-                        <li>Cambie las contraseñas después del primer inicio de sesión</li>
-                        <li>Elimine este archivo (install.php) por seguridad</li>
-                        <li>Configure el correo SMTP en el panel de administración</li>
-                    </ul>
+                <div class="warning-box">
+                    <h3>⚠️ Pasos de Seguridad</h3>
+                    <ol style="margin-left: 20px; line-height: 2;">
+                        <li><strong>ELIMINE</strong> este archivo (install.php) inmediatamente</li>
+                        <li>Cambie las contraseñas de los usuarios después del primer login</li>
+                        <li>Active HTTPS/SSL en cPanel</li>
+                        <li>Verifique los permisos de archivos (644 para archivos, 755 para carpetas)</li>
+                    </ol>
                 </div>
                 
                 <form method="POST" action="?step=4">

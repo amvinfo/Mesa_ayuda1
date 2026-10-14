@@ -1,17 +1,30 @@
 -- =====================================================
 -- MESA DE AYUDA - Base de Datos
 -- Gobierno de Chile - Sistema de Soporte Técnico
+-- NOTA: Este script NO crea la base de datos.
+-- La BD debe existir previamente (creada desde cPanel).
 -- =====================================================
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
-
-CREATE DATABASE IF NOT EXISTS `mesadeayuda` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE `mesadeayuda`;
+SET foreign_key_checks = 0;
 
 -- =====================================================
 -- TABLA: roles
 -- =====================================================
+DROP TABLE IF EXISTS `audit_logs`;
+DROP TABLE IF EXISTS `ticket_history`;
+DROP TABLE IF EXISTS `ticket_messages`;
+DROP TABLE IF EXISTS `knowledge_articles`;
+DROP TABLE IF EXISTS `tickets`;
+DROP TABLE IF EXISTS `users`;
+DROP TABLE IF EXISTS `settings`;
+DROP TABLE IF EXISTS `ticket_types`;
+DROP TABLE IF EXISTS `categories`;
+DROP TABLE IF EXISTS `locations`;
+DROP TABLE IF EXISTS `departments`;
+DROP TABLE IF EXISTS `roles`;
+
 CREATE TABLE `roles` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(50) NOT NULL,
@@ -195,6 +208,8 @@ CREATE TABLE `settings` (
   `value` TEXT DEFAULT NULL,
   PRIMARY KEY (`key_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+SET foreign_key_checks = 1;
 
 -- =====================================================
 -- DATOS INICIALES
