@@ -1,129 +1,135 @@
 # 🏥 Mesa de Ayuda - Sistema de Soporte Técnico
 
-Sistema web completo de Mesa de Ayuda y Soporte Técnico con interfaz institucional del Gobierno de Chile.
+Sistema web completo de Mesa de Ayuda con interfaz institucional del Gobierno de Chile.
 
-## 🚀 Instalación Rápida en XAMPP
+## 🎯 Características
 
-### Paso 1: Descargar e Instalar XAMPP
-1. Descarga XAMPP desde: https://www.apachefriends.org/
-2. Instálalo en tu computadora (por defecto en `C:\xampp` en Windows)
+✅ Portal público con buscador de base de conocimiento  
+✅ Creación de tickets con validación  
+✅ Consulta de estado de tickets  
+✅ Panel interno para funcionarios  
+✅ Gestión de tickets (asignar, responder, cambiar estado)  
+✅ Base de conocimiento externa e interna  
+✅ Sistema de roles y permisos  
+✅ Diseño responsive y accesible  
+✅ Instalador web automático  
 
-### Paso 2: Copiar los Archivos
-1. Abre el Explorador de Archivos
-2. Navega a la carpeta `C:\xampp\htdocs\`
-3. Crea una nueva carpeta llamada `mesadeayuda`
-4. Copia **TODO el contenido** de la carpeta `dist/` dentro de `C:\xampp\htdocs\mesadeayuda\`
+## 🚀 Instalación Rápida
 
-La estructura debe quedar así:
+### Opción 1: cPanel (Recomendado para hosting)
+
+1. Sube la carpeta `cpanel/` a tu hosting
+2. Crea una base de datos MySQL en cPanel
+3. Visita `tudominio.com/install.php`
+4. Sigue el asistente de instalación
+
+📖 **Guía completa:** [INSTALACION-CPANEL.md](cpanel/INSTALACION-CPANEL.md)
+
+### Opción 2: XAMPP (Local)
+
+1. Copia la carpeta `cpanel/` a `C:\xampp\htdocs\mesadeayuda\`
+2. Inicia Apache y MySQL en XAMPP
+3. Visita `http://localhost/mesadeayuda/install.php`
+
+### Opción 3: Desarrollo Local
+
+```bash
+npm install
+npm run dev
 ```
-C:\xampp\htdocs\mesadeayuda\
-├── index.html
-├── .htaccess
-└── assets/
-    ├── index-XXXXX.js
-    └── index-XXXXX.css
+
+## 🔐 Credenciales por Defecto
+
+| Usuario | Contraseña | Rol |
+|---------|------------|-----|
+| admin | admin123 | Administrador |
+| supervisor | supervisor123 | Supervisor |
+| tecnico | tecnico123 | Técnico |
+
+**⚠️ Cambia las contraseñas inmediatamente después de instalar**
+
+## 📋 Requisitos
+
+- PHP 7.4 o superior
+- MySQL 5.7+ / MariaDB 10.3+
+- Servidor web Apache con mod_rewrite
+- Navegador moderno (Chrome, Firefox, Edge, Safari)
+
+## 🏗️ Estructura del Proyecto
+
+```
+mesadeayuda/
+├── cpanel/                 → Versión para hosting (HTML+PHP+MySQL)
+│   ├── index.html         → Portal público
+│   ├── login.html         → Login de funcionarios
+│   ├── dashboard.html     → Panel interno
+│   ├── install.php        → Instalador web
+│   ├── db.php             → Conexión a BD
+│   ├── database.sql       → Script SQL
+│   ├── .htaccess          → Configuración Apache
+│   └── api/
+│       └── index.php      → API REST
+│
+├── src/                    → Código fuente React (desarrollo)
+│   ├── components/
+│   ├── pages/
+│   ├── context/
+│   └── data/
+│
+├── dist/                   → Build de producción (React)
+├── package.json
+└── README.md
 ```
 
-### Paso 3: Iniciar XAMPP
-1. Abre el **Panel de Control de XAMPP**
-2. Haz clic en **Start** junto a **Apache**
-3. Espera a que el fondo se ponga verde (indicando que está activo)
+## 🎨 Diseño
 
-### Paso 4: Abrir en el Navegador
-Abre tu navegador web y ve a:
-```
-http://localhost/mesadeayuda/
-```
+- **Tipografía:** Asap (oficial gobCL)
+- **Paleta de colores:** Institucional Gobierno de Chile
+  - Azul primario: `#0066B3`
+  - Azul oscuro: `#004A83`
+  - Verde acento: `#2E7D32`
+- **Accesibilidad:** WCAG 2.1 AA
+- **Responsive:** Mobile-first
 
-¡Listo! Ya puedes usar el sistema.
+## 📖 Documentación
 
----
+- [Guía de Instalación en cPanel](cpanel/INSTALACION-CPANEL.md)
+- [Guía Rápida](GUIA-RAPIDA.md)
+- [Instrucciones XAMPP](INSTRUCCIONES.txt)
 
-## 📂 Ver como Archivo HTML Directo
+## 🔒 Seguridad
 
-Si prefieres abrir el archivo HTML directamente sin XAMPP:
+- Contraseñas hasheadas con bcrypt
+- Consultas preparadas (previene SQL injection)
+- Protección CSRF en formularios
+- Validación de datos en servidor y cliente
+- Separación de bases de conocimiento (externa/interna)
+- Tokens seguros para consulta de tickets
 
-### Opción A: Doble Clic
-1. Navega a la carpeta `dist/`
-2. Haz doble clic en `index.html`
-3. Se abrirá en tu navegador predeterminado
+## 🛠️ Tecnologías
 
-### Opción B: Arrastrar al Navegador
-1. Abre tu navegador (Chrome, Firefox, Edge)
-2. Arrastra el archivo `dist/index.html` a la ventana del navegador
+### Versión cPanel (Producción)
+- HTML5 + CSS3 + JavaScript vanilla
+- PHP 7.4+ con PDO
+- MySQL/MariaDB
+- API REST
 
-**Nota:** Al abrir directamente, algunas funcionalidades pueden no funcionar correctamente debido a restricciones de seguridad del navegador. Se recomienda usar XAMPP para una experiencia completa.
+### Versión Desarrollo
+- React 18
+- TypeScript
+- Vite
+- Tailwind CSS
 
----
+## 📝 Licencia
 
-## 🔐 Credenciales de Acceso
-
-### Usuarios de Prueba:
-| Rol | Usuario | Contraseña |
-|-----|---------|------------|
-| Administrador | `admin` | `admin123` |
-| Supervisor | `supervisor` | `admin123` |
-| Técnico | `tecnico` | `admin123` |
-
----
-
-## 📋 Funcionalidades Principales
-
-### Portal Público (sin login):
-- ✅ Buscador de base de conocimiento
-- ✅ Crear solicitud de soporte (inline)
-- ✅ Consultar estado de ticket (inline)
-- ✅ Categorías de ayuda
-
-### Panel Interno (con login):
-- ✅ Dashboard con estadísticas
-- ✅ Gestión de tickets
-- ✅ Base de conocimiento interna
-- ✅ Panel de administración
-- ✅ Gestión de usuarios y roles
-
----
-
-## 🛠️ Solución de Problemas
-
-### Problema: Página en blanco
-**Solución:** Asegúrate de que la estructura de carpetas sea correcta. El archivo `index.html` debe estar en la raíz de `mesadeayuda/`, no dentro de una subcarpeta.
-
-### Problema: Error 404 al navegar
-**Solución:** Verifica que el archivo `.htaccess` esté presente en la carpeta `mesadeayuda/`. Este archivo es necesario para que Apache maneje las rutas del SPA.
-
-### Problema: Apache no inicia
-**Solución:** 
-1. Cierra Skype u otros programas que usen el puerto 80
-2. En XAMPP Config > Apache > httpd.conf, cambia el puerto a 8080
-3. Accede a `http://localhost:8080/mesadeayuda/`
-
----
-
-## 📱 Requisitos del Sistema
-
-- **Navegador:** Chrome 90+, Firefox 88+, Edge 90+, Safari 14+
-- **Para XAMPP:** Windows 10/11, macOS 10.14+, Linux
-- **Resolución:** Optimizado para móviles y escritorio (responsive)
-
----
-
-## 🎨 Características de Diseño
-
-- ✅ Diseño institucional Gobierno de Chile
-- ✅ Tipografía oficial (Asap/gobCL)
-- ✅ Paleta cromática institucional
-- ✅ Accesibilidad WCAG 2.1 AA
-- ✅ Mobile-first responsive
-- ✅ Comportamiento inline (sin recargas)
-
----
+Este proyecto fue desarrollado para el Gobierno de Chile.
 
 ## 📞 Soporte
 
-Para más información o soporte técnico, contacta al equipo de desarrollo.
+Para problemas técnicos o consultas, contacta al equipo de desarrollo.
 
 ---
 
 **Versión:** 1.0.0  
-**Última actualización:** 2026
+**Última actualización:** 2026  
+**Compatible con:** cPanel, XAMPP, LAMP, WAMP

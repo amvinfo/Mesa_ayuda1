@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mesa de Ayuda | Gobierno de Chile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Asap', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #F5F5F5;
+            color: #333;
+            line-height: 1.5;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        
+        /* Header */
+        .top-bar { background: #004A83; color: white; padding: 8px 0; font-size: 12px; }
+        .top-bar-content { display: flex; justify-content: space-between; align-items: center; }
+        .top-bar a { color: white; text-decoration: none; }
+        .main-header { background: white; border-bottom: 1px solid #e0e0e0; padding: 16px 0; }
+        .main-header-content { display: flex; justify-content: space-between; align-items: center; }
+        .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .logo-icon { width: 48px; height: 48px; background: #0066B3; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: bold; }
+        .logo-text h1 { font-size: 18px; color: #004A83; font-weight: 700; }
+        .logo-text p { font-size: 12px; color: #666; }
+        .nav-links { display: flex; gap: 8px; align-items: center; }
+        .nav-links a { padding: 8px 16px; text-decoration: none; color: #424242; font-weight: 500; border-radius: 8px; transition: all 0.2s; }
+        .nav-links a:hover { background: #f5f5f5; }
+        .btn-login { background: #0066B3 !important; color: white !important; }
+        
+        /* Hero */
+        .hero { background: linear-gradient(180deg, #E8F4FD 0%, #F5F5F5 100%); padding: 60px 0; text-align: center; }
+        .hero h2 { font-size: 36px; color: #004A83; margin-bottom: 12px; }
+        .hero p { color: #666; margin-bottom: 32px; }
+        .search-box { max-width: 600px; margin: 0 auto; position: relative; }
+        .search-box input { width: 100%; padding: 16px 140px 16px 48px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 16px; }
+        .search-box input:focus { outline: none; border-color: #0066B3; }
+        .search-box button { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: #0066B3; color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #9E9E9E; }
+        
+        /* Cards */
+        .section { padding: 40px 0; }
+        .section-title { text-align: center; font-size: 24px; color: #004A83; margin-bottom: 32px; }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .category-card { background: white; padding: 24px; border-radius: 16px; border: 1px solid #e0e0e0; cursor: pointer; transition: all 0.3s; }
+        .category-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.1); border-color: #0066B3; }
+        .category-card-content { display: flex; gap: 12px; align-items: flex-start; }
+        .category-icon { font-size: 32px; }
+        .category-info h3 { font-size: 16px; color: #333; margin-bottom: 4px; }
+        .category-info p { font-size: 13px; color: #666; }
+        
+        /* Action Cards */
+        .action-cards { max-width: 800px; margin: 0 auto; }
+        .action-card { background: white; border-radius: 16px; border: 1px solid #e0e0e0; margin-bottom: 20px; overflow: hidden; transition: all 0.3s; }
+        .action-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+        .action-card-header { padding: 32px; cursor: pointer; display: flex; gap: 20px; align-items: flex-start; }
+        .action-icon { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
+        .action-icon.blue { background: #E8F4FD; }
+        .action-icon.green { background: #E8F5E9; }
+        .action-info { flex: 1; }
+        .action-info h3 { font-size: 20px; color: #333; margin-bottom: 8px; }
+        .action-info p { color: #666; font-size: 14px; }
+        .expand-icon { width: 32px; height: 32px; background: #f5f5f5; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 0.3s; }
+        .expand-icon.rotated { transform: rotate(180deg); }
+        
+        /* Forms */
+        .action-card-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
+        .action-card-content.expanded { max-height: 2000px; }
+        .form-container { padding: 32px; background: #FAFAFA; border-top: 1px solid #e0e0e0; }
+        .form-title { font-size: 18px; color: #004A83; margin-bottom: 24px; font-weight: 600; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 16px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 14px; font-weight: 600; color: #424242; margin-bottom: 6px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1.5px solid #BDBDBD; border-radius: 8px; font-size: 14px; font-family: inherit; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #0066B3; }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { background: #0066B3; color: white; }
+        .btn-primary:hover { background: #004A83; }
+        .btn-secondary { background: white; color: #0066B3; border: 2px solid #0066B3; }
+        .btn-secondary:hover { background: #E8F4FD; }
+        .btn-success { background: #2E7D32; color: white; }
+        .btn-success:hover { background: #1B5E20; }
+        .btn-group { display: flex; gap: 12px; margin-top: 24px; }
+        
+        /* Alerts */
+        .alert { padding: 16px; border-radius: 8px; margin-bottom: 16px; }
+        .alert-error { background: #FFEBEE; border: 2px solid #FFCDD2; color: #C62828; }
+        .alert-success { background: #E8F5E9; border: 2px solid #C8E6C9; color: #2E7D32; }
+        .alert-warning { background: #FFF8E1; border: 2px solid #FFE082; color: #F57F17; }
+        
+        /* Ticket Result */
+        .ticket-result { background: white; border-radius: 12px; border: 1px solid #e0e0e0; padding: 24px; margin-top: 24px; }
+        .ticket-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #e0e0e0; }
+        .ticket-number { font-size: 24px; font-weight: 700; color: #004A83; }
+        .status-badge { padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+        .status-new { background: #E8F4FD; color: #0066B3; }
+        .status-progress { background: #FFF8E1; color: #F57F17; }
+        .status-resolved { background: #E8F5E9; color: #2E7D32; }
+        .ticket-details { display: grid; gap: 16px; }
+        .ticket-detail { display: flex; gap: 12px; align-items: flex-start; }
+        .ticket-detail-icon { color: #9E9E9E; margin-top: 2px; }
+        .ticket-detail-label { font-size: 11px; color: #757575; text-transform: uppercase; letter-spacing: 0.5px; }
+        .ticket-detail-value { font-weight: 500; color: #333; }
+        
+        /* Footer */
+        .footer { background: white; border-top: 1px solid #e0e0e0; padding: 32px 0; margin-top: 60px; }
+        .footer-content { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 32px; }
+        .footer-section h4 { color: #004A83; margin-bottom: 12px; font-size: 14px; }
+        .footer-section p, .footer-section a { color: #666; font-size: 13px; text-decoration: none; display: block; margin-bottom: 8px; }
+        .footer-section a:hover { color: #0066B3; }
+        .footer-bottom { text-align: center; padding-top: 24px; margin-top: 24px; border-top: 1px solid #e0e0e0; color: #9E9E9E; font-size: 12px; }
+        
+        /* Loading */
+        .loading { text-align: center; padding: 40px; color: #9E9E9E; }
+        .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #0066B3; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 16px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h2 { font-size: 28px; }
+            .nav-links { display: none; }
+            .action-card-header { padding: 20px; }
+            .form-container { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="container top-bar-content">
+            <div>
+                <strong>GOBIERNO DE CHILE</strong> | HELPDESK
+            </div>
+            <a href="#" onclick="showLogin()">Acceso Funcionarios</a>
+        </div>
+    </div>
+    
+    <!-- Main Header -->
+    <header class="main-header">
+        <div class="container main-header-content">
+            <a href="#" class="logo" onclick="location.reload()">
+                <div class="logo-icon">🛠️</div>
+                <div class="logo-text">
+                    <h1>Mesa de Ayuda</h1>
+                    <p>Sistema de Soporte Técnico</p>
+                </div>
+            </a>
+            <nav class="nav-links">
+                <a href="#" onclick="location.reload()">Inicio</a>
+                <a href="#" onclick="showKnowledge()">Base de Conocimiento</a>
+                <a href="#" class="btn-login" onclick="showLogin()">Iniciar Sesión</a>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h2>¿En qué podemos ayudarte?</h2>
+            <p>Busca soluciones, guías y respuestas a las consultas más frecuentes antes de crear una solicitud de soporte.</p>
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Buscar artículos de ayuda..." onkeypress="if(event.key==='Enter')searchArticles()">
+                <button onclick="searchArticles()">Buscar</button>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Search Results -->
+        <div id="searchResults" style="display: none;"></div>
+        
+        <!-- Categories -->
+        <section class="section">
+            <h2 class="section-title">Categorías de Ayuda</h2>
+            <div class="cards-grid" id="categoriesGrid">
+                <div class="loading"><div class="spinner"></div>Cargando categorías...</div>
+            </div>
+        </section>
+        
+        <!-- Action Cards -->
+        <section class="section">
+            <div class="action-cards">
+                <!-- Card 1: Solicitar Soporte -->
+                <div class="action-card">
+                    <div class="action-card-header" onclick="toggleCard('create')">
+                        <div class="action-icon blue">🎧</div>
+                        <div class="action-info">
+                            <h3>Solicitar Soporte Técnico</h3>
+                            <p>¿Tienes un problema o necesitas asistencia? Registra tu solicitud para que nuestro equipo de soporte pueda ayudarte.</p>
+                        </div>
+                        <div class="expand-icon" id="expandCreate">▼</div>
+                    </div>
+                    <div class="action-card-content" id="createContent">
+                        <div class="form-container">
+                            <h3 class="form-title">Crear Nueva Solicitud</h3>
+                            <form id="createForm" onsubmit="submitTicket(event)">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label>Nombre Completo *</label>
+                                        <input type="text" id="ticketName" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Correo Electrónico *</label>
+                                        <input type="email" id="ticketEmail" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Categoría *</label>
+                                        <select id="ticketCategory" required></select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Tipo de Solicitud *</label>
+                                        <select id="ticketType" required></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Asunto *</label>
+                                    <input type="text" id="ticketSubject" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Descripción Detallada *</label>
+                                    <textarea id="ticketDescription" required placeholder="Describa el problema con el mayor detalle posible..."></textarea>
+                                </div>
+                                <div class="btn-group">
+                                    <button type="submit" class="btn btn-primary">📤 Enviar Solicitud de Soporte</button>
+                                    <button type="button" class="btn btn-secondary" onclick="toggleCard('create')">Cancelar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card 2: Consultar Ticket -->
+                <div class="action-card">
+                    <div class="action-card-header" onclick="toggleCard('consult')">
+                        <div class="action-icon green">🔍</div>
+                        <div class="action-info">
+                            <h3>Consultar Estado de Ticket</h3>
+                            <p>Revisa el progreso de tu solicitud ingresando el número asignado.</p>
+                        </div>
+                        <div class="expand-icon" id="expandConsult">▼</div>
+                    </div>
+                    <div class="action-card-content" id="consultContent">
+                        <div class="form-container">
+                            <h3 class="form-title">Buscar mi Ticket</h3>
+                            <form id="consultForm" onsubmit="checkTicket(event)">
+                                <div class="form-group">
+                                    <label>Número de Ticket</label>
+                                    <input type="text" id="consultNumber" placeholder="Ej: TK-AB12CD34" required>
+                                    <small style="color: #9E9E9E; margin-top: 4px; display: block;">Ingrese el número de ticket que recibió al crear su solicitud.</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Token de Acceso <span style="color: #9E9E9E; font-weight: normal;">(opcional)</span></label>
+                                    <input type="text" id="consultToken" placeholder="Token enviado a su correo">
+                                </div>
+                                <div id="consultError"></div>
+                                <div class="btn-group">
+                                    <button type="submit" class="btn btn-success">🔍 Consultar Estado</button>
+                                    <button type="button" class="btn btn-secondary" onclick="toggleCard('consult')">Cancelar</button>
+                                </div>
+                            </form>
+                            <div id="ticketResult"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Mesa de Ayuda</h4>
+                    <p>Sistema de soporte técnico institucional para la ciudadanía y funcionarios.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Contacto</h4>
+                    <p>soporte@gob.cl</p>
+                    <p>+56 2 2345 6789</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Enlaces</h4>
+                    <a href="#" onclick="location.reload()">Inicio</a>
+                    <a href="#" onclick="showKnowledge()">Base de Conocimiento</a>
+                    <a href="#" onclick="showLogin()">Acceso Funcionarios</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                © 2026 Gobierno de Chile
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Variables globales
+        let categories = [];
+        let types = [];
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCategories();
+            loadTypes();
+        });
+        
+        // Cargar categorías
+        async function loadCategories() {
+            try {
+                const response = await fetch('api/index.php?action=categories&scope=external');
+                categories = await response.json();
+                renderCategories();
+                renderCategorySelect();
+            } catch (error) {
+                console.error('Error cargando categorías:', error);
+            }
+        }
+        
+        // Cargar tipos
+        async function loadTypes() {
+            try {
+                const response = await fetch('api/index.php?action=ticket_types');
+                types = await response.json();
+                renderTypeSelect();
+            } catch (error) {
+                console.error('Error cargando tipos:', error);
+            }
+        }
+        
+        // Renderizar categorías
+        function renderCategories() {
+            const grid = document.getElementById('categoriesGrid');
+            grid.innerHTML = categories.slice(0, 6).map(cat => `
+                <div class="category-card" onclick="filterByCategory(${cat.id})">
+                    <div class="category-card-content">
+                        <div class="category-icon">${cat.icon}</div>
+                        <div class="category-info">
+                            <h3>${cat.name}</h3>
+                            <p>${cat.description || ''}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Renderizar select de categorías
+        function renderCategorySelect() {
+            const select = document.getElementById('ticketCategory');
+            select.innerHTML = '<option value="">Seleccionar categoría...</option>' +
+                categories.map(cat => `<option value="${cat.id}">${cat.icon} ${cat.name}</option>`).join('');
+        }
+        
+        // Renderizar select de tipos
+        function renderTypeSelect() {
+            const select = document.getElementById('ticketType');
+            select.innerHTML = '<option value="">Seleccionar tipo...</option>' +
+                types.map(type => `<option value="${type.id}">${type.name}</option>`).join('');
+        }
+        
+        // Toggle cards
+        function toggleCard(card) {
+            const content = document.getElementById(card + 'Content');
+            const icon = document.getElementById('expand' + card.charAt(0).toUpperCase() + card.slice(1));
+            
+            content.classList.toggle('expanded');
+            icon.classList.toggle('rotated');
+        }
+        
+        // Crear ticket
+        async function submitTicket(event) {
+            event.preventDefault();
+            
+            const data = {
+                name: document.getElementById('ticketName').value,
+                email: document.getElementById('ticketEmail').value,
+                category_id: document.getElementById('ticketCategory').value,
+                type_id: document.getElementById('ticketType').value,
+                subject: document.getElementById('ticketSubject').value,
+                description: document.getElementById('ticketDescription').value,
+                priority: 'medium'
+            };
+            
+            try {
+                const response = await fetch('api/index.php?action=create_ticket', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`¡Solicitud creada exitosamente!\n\nNúmero de ticket: ${result.ticket_number}\nToken de acceso: ${result.access_token}\n\nGuarde esta información para consultar el estado.`);
+                    document.getElementById('createForm').reset();
+                    toggleCard('create');
+                } else {
+                    alert('Error: ' + (result.error || 'No se pudo crear la solicitud'));
+                }
+            } catch (error) {
+                alert('Error de conexión. Intente nuevamente.');
+                console.error(error);
+            }
+        }
+        
+        // Consultar ticket
+        async function checkTicket(event) {
+            event.preventDefault();
+            
+            const ticketNumber = document.getElementById('consultNumber').value;
+            const token = document.getElementById('consultToken').value;
+            const errorDiv = document.getElementById('consultError');
+            const resultDiv = document.getElementById('ticketResult');
+            
+            errorDiv.innerHTML = '';
+            resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div>Buscando ticket...</div>';
+            
+            try {
+                const response = await fetch('api/index.php?action=check_ticket', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ticket_number: ticketNumber, access_token: token })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const ticket = result.ticket;
+                    const statusClass = ticket.status === 'resolved' ? 'status-resolved' :
+                                       ticket.status === 'new' ? 'status-new' : 'status-progress';
+                    const statusText = {
+                        'new': 'Nuevo', 'open': 'Abierto', 'assigned': 'Asignado',
+                        'in_progress': 'En atención', 'resolved': 'Resuelto', 'closed': 'Cerrado'
+                    }[ticket.status] || ticket.status;
+                    
+                    resultDiv.innerHTML = `
+                        <div class="ticket-result">
+                            <div class="ticket-header">
+                                <div>
+                                    <div style="font-size: 11px; color: #757575; text-transform: uppercase;">Ticket</div>
+                                    <div class="ticket-number">${ticket.ticket_number}</div>
+                                </div>
+                                <span class="status-badge ${statusClass}">${statusText}</span>
+                            </div>
+                            <div class="ticket-details">
+                                <div class="ticket-detail">
+                                    <span class="ticket-detail-icon">🏷️</span>
+                                    <div>
+                                        <div class="ticket-detail-label">Asunto</div>
+                                        <div class="ticket-detail-value">${ticket.subject}</div>
+                                    </div>
+                                </div>
+                                <div class="ticket-detail">
+                                    <span class="ticket-detail-icon">📅</span>
+                                    <div>
+                                        <div class="ticket-detail-label">Fecha de creación</div>
+                                        <div class="ticket-detail-value">${new Date(ticket.created_at).toLocaleString('es-CL')}</div>
+                                    </div>
+                                </div>
+                                <div class="ticket-detail">
+                                    <span class="ticket-detail-icon">👤</span>
+                                    <div>
+                                        <div class="ticket-detail-label">Solicitante</div>
+                                        <div class="ticket-detail-value">${ticket.requester_name}</div>
+                                    </div>
+                                </div>
+                                <div class="ticket-detail">
+                                    <span class="ticket-detail-icon">⚡</span>
+                                    <div>
+                                        <div class="ticket-detail-label">Prioridad</div>
+                                        <div class="ticket-detail-value" style="text-transform: capitalize;">${ticket.priority}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            ${ticket.messages && ticket.messages.length > 0 ? `
+                                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+                                    <div style="font-weight: 600; margin-bottom: 12px;">💬 Comunicaciones</div>
+                                    ${ticket.messages.map(msg => `
+                                        <div style="background: #f5f5f5; padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                                <strong style="font-size: 13px;">${msg.author_name}</strong>
+                                                <span style="font-size: 11px; color: #9E9E9E;">${new Date(msg.created_at).toLocaleString('es-CL')}</span>
+                                            </div>
+                                            <p style="font-size: 13px; color: #666;">${msg.content}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                } else {
+                    errorDiv.innerHTML = `<div class="alert alert-error">${result.error}</div>`;
+                    resultDiv.innerHTML = '';
+                }
+            } catch (error) {
+                errorDiv.innerHTML = '<div class="alert alert-error">Error de conexión. Intente nuevamente.</div>';
+                resultDiv.innerHTML = '';
+                console.error(error);
+            }
+        }
+        
+        // Buscar artículos
+        async function searchArticles() {
+            const query = document.getElementById('searchInput').value;
+            if (!query.trim()) return;
+            
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div>Buscando...</div>';
+            
+            try {
+                const response = await fetch(`api/index.php?action=search_articles&q=${encodeURIComponent(query)}`);
+                const articles = await response.json();
+                
+                if (articles.length === 0) {
+                    resultsDiv.innerHTML = `
+                        <div class="alert alert-warning">
+                            No se encontraron artículos para "${query}". Intente con otros términos.
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div style="background: white; padding: 24px; border-radius: 16px; border: 1px solid #e0e0e0; margin-bottom: 32px;">
+                            <h3 style="color: #004A83; margin-bottom: 16px;">Resultados para "${query}"</h3>
+                            ${articles.map(article => `
+                                <div style="padding: 16px; border: 1px solid #e0e0e0; border-radius: 12px; margin-bottom: 12px; cursor: pointer;" onclick="viewArticle(${article.id})">
+                                    <h4 style="color: #333; margin-bottom: 4px;">${article.title}</h4>
+                                    <p style="color: #666; font-size: 13px;">${article.summary || ''}</p>
+                                    <div style="font-size: 11px; color: #9E9E9E; margin-top: 8px;">
+                                        👁️ ${article.views} vistas • ${new Date(article.updated_at).toLocaleDateString('es-CL')}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = '<div class="alert alert-error">Error al buscar artículos.</div>';
+                console.error(error);
+            }
+        }
+        
+        // Filtrar por categoría
+        async function filterByCategory(categoryId) {
+            const category = categories.find(c => c.id == categoryId);
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div>Cargando artículos...</div>';
+            
+            try {
+                const response = await fetch(`api/index.php?action=search_articles&category_id=${categoryId}`);
+                const articles = await response.json();
+                
+                resultsDiv.innerHTML = `
+                    <div style="background: white; padding: 24px; border-radius: 16px; border: 1px solid #e0e0e0; margin-bottom: 32px;">
+                        <h3 style="color: #004A83; margin-bottom: 16px;">${category.icon} ${category.name}</h3>
+                        ${articles.length === 0 ? '<p style="color: #9E9E9E;">No hay artículos en esta categoría.</p>' :
+                        articles.map(article => `
+                            <div style="padding: 16px; border: 1px solid #e0e0e0; border-radius: 12px; margin-bottom: 12px; cursor: pointer;" onclick="viewArticle(${article.id})">
+                                <h4 style="color: #333; margin-bottom: 4px;">${article.title}</h4>
+                                <p style="color: #666; font-size: 13px;">${article.summary || ''}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = '<div class="alert alert-error">Error al cargar artículos.</div>';
+            }
+        }
+        
+        // Ver artículo
+        async function viewArticle(id) {
+            try {
+                const response = await fetch(`api/index.php?action=article&id=${id}`);
+                const article = await response.json();
+                
+                const resultsDiv = document.getElementById('searchResults');
+                resultsDiv.innerHTML = `
+                    <div style="background: white; padding: 32px; border-radius: 16px; border: 1px solid #e0e0e0; margin-bottom: 32px;">
+                        <button onclick="document.getElementById('searchResults').style.display='none'" style="background: none; border: none; color: #0066B3; cursor: pointer; margin-bottom: 16px; font-size: 14px;">← Volver</button>
+                        <h2 style="color: #004A83; margin-bottom: 16px;">${article.title}</h2>
+                        <div style="color: #666; line-height: 1.8;">${article.content}</div>
+                        <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #e0e0e0; font-size: 13px; color: #9E9E9E;">
+                            👁️ ${article.views} vistas • Actualizado: ${new Date(article.updated_at).toLocaleDateString('es-CL')}
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                alert('Error al cargar el artículo.');
+            }
+        }
+        
+        // Navegación
+        function showLogin() {
+            window.location.href = 'login.html';
+        }
+        
+        function showKnowledge() {
+            // Por ahora redirige al inicio con búsqueda
+            document.getElementById('searchInput').focus();
+        }
+    </script>
+</body>
+</html>
