@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel - Mesa de Ayuda</title>
+    <link href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Asap', sans-serif; background: #F5F5F5; }
+        .layout { display: flex; min-height: 100vh; }
+        
+        /* Sidebar */
+        .sidebar { width: 240px; background: white; border-right: 1px solid #e0e0e0; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 16px; border-bottom: 1px solid #e0e0e0; display: flex; align-items: center; gap: 12px; }
+        .sidebar-logo { width: 40px; height: 40px; background: #0066B3; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; }
+        .sidebar-title { font-size: 14px; font-weight: 700; color: #004A83; }
+        .sidebar-subtitle { font-size: 11px; color: #666; }
+        .sidebar-nav { padding: 16px; flex: 1; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; color: #666; text-decoration: none; font-size: 14px; font-weight: 500; margin-bottom: 4px; cursor: pointer; transition: all 0.2s; }
+        .nav-item:hover { background: #f5f5f5; }
+        .nav-item.active { background: #0066B3; color: white; }
+        .sidebar-footer { padding: 16px; border-top: 1px solid #e0e0e0; }
+        .logout-btn { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; color: #D32F2F; font-size: 14px; font-weight: 500; cursor: pointer; border: none; background: none; width: 100%; text-align: left; }
+        .logout-btn:hover { background: #FFEBEE; }
+        
+        /* Main */
+        .main { flex: 1; display: flex; flex-direction: column; }
+        .topbar { background: white; border-bottom: 1px solid #e0e0e0; padding: 12px 24px; display: flex; justify-content: flex-end; align-items: center; }
+        .user-info { display: flex; align-items: center; gap: 8px; }
+        .user-avatar { width: 32px; height: 32px; background: #E8F4FD; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #0066B3; font-weight: 600; }
+        .user-name { font-size: 13px; font-weight: 600; color: #333; }
+        .user-role { font-size: 11px; color: #666; }
+        .content { padding: 24px; flex: 1; }
+        
+        /* Stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: white; border-radius: 12px; border: 1px solid #e0e0e0; padding: 20px; }
+        .stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 12px; }
+        .stat-value { font-size: 28px; font-weight: 700; color: #333; }
+        .stat-label { font-size: 12px; color: #666; }
+        
+        /* Tickets Table */
+        .panel { background: white; border-radius: 12px; border: 1px solid #e0e0e0; overflow: hidden; }
+        .panel-header { padding: 16px 20px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; }
+        .panel-title { font-size: 16px; font-weight: 600; color: #333; }
+        .btn { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
+        .btn-primary { background: #0066B3; color: white; }
+        .btn-primary:hover { background: #004A83; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        
+        .tickets-table { width: 100%; border-collapse: collapse; }
+        .tickets-table th { text-align: left; padding: 12px 16px; background: #FAFAFA; font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; border-bottom: 1px solid #e0e0e0; }
+        .tickets-table td { padding: 12px 16px; border-bottom: 1px solid #f5f5f5; font-size: 13px; }
+        .tickets-table tr:hover { background: #FAFAFA; }
+        .ticket-number { font-family: monospace; font-size: 12px; color: #0066B3; font-weight: 600; }
+        .ticket-subject { font-weight: 500; color: #333; }
+        .ticket-requester { color: #666; font-size: 12px; }
+        
+        .status-badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-block; }
+        .status-new { background: #E8F4FD; color: #0066B3; }
+        .status-open { background: #E8F4FD; color: #0066B3; }
+        .status-assigned { background: #E8EAF6; color: #3F51B5; }
+        .status-in_progress { background: #FFF8E1; color: #F57F17; }
+        .status-waiting { background: #FFF3E0; color: #EF6C00; }
+        .status-resolved { background: #E8F5E9; color: #2E7D32; }
+        .status-closed { background: #F5F5F5; color: #616161; }
+        
+        .priority-badge { padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; text-transform: uppercase; }
+        .priority-low { background: #F5F5F5; color: #616161; }
+        .priority-medium { background: #E8F4FD; color: #0066B3; }
+        .priority-high { background: #FFF3E0; color: #EF6C00; }
+        .priority-critical { background: #FFEBEE; color: #C62828; }
+        
+        /* Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: white; border-radius: 16px; max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto; }
+        .modal-header { padding: 20px 24px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; }
+        .modal-title { font-size: 18px; font-weight: 600; color: #004A83; }
+        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
+        .modal-body { padding: 24px; }
+        
+        .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
+        .detail-item { }
+        .detail-label { font-size: 11px; color: #757575; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .detail-value { font-weight: 500; color: #333; font-size: 14px; }
+        
+        .messages-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0; }
+        .message { padding: 12px; border-radius: 8px; margin-bottom: 8px; }
+        .message-public { background: #E8F4FD; border: 1px solid #B3D9F2; }
+        .message-internal { background: #FFF8E1; border: 1px solid #FFE082; }
+        .message-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .message-author { font-weight: 600; font-size: 13px; }
+        .message-date { font-size: 11px; color: #999; }
+        .message-content { font-size: 13px; color: #333; }
+        .internal-badge { background: #FFE082; color: #F57F17; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; margin-left: 8px; }
+        
+        .reply-form { margin-top: 16px; }
+        .reply-form textarea { width: 100%; padding: 12px; border: 1.5px solid #BDBDBD; border-radius: 8px; font-family: inherit; font-size: 13px; min-height: 80px; resize: vertical; }
+        .reply-form textarea:focus { outline: none; border-color: #0066B3; }
+        .reply-actions { display: flex; gap: 8px; margin-top: 12px; align-items: center; }
+        .reply-type { display: flex; gap: 4px; }
+        .reply-type button { padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid #e0e0e0; background: white; }
+        .reply-type button.active { background: #0066B3; color: white; border-color: #0066B3; }
+        
+        .loading { text-align: center; padding: 40px; color: #9E9E9E; }
+        .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #0066B3; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 16px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .empty-state { text-align: center; padding: 40px; color: #9E9E9E; }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">🛠️</div>
+                <div>
+                    <div class="sidebar-title">Mesa de Ayuda</div>
+                    <div class="sidebar-subtitle">Panel Funcionarios</div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a class="nav-item active" onclick="showSection('dashboard')">📊 Panel Principal</a>
+                <a class="nav-item" onclick="showSection('tickets')">🎫 Tickets</a>
+                <a class="nav-item" onclick="showSection('knowledge')">📚 Base de Conocimiento</a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="logout-btn" onclick="logout()">🚪 Cerrar Sesión</button>
+            </div>
+        </aside>
+        
+        <!-- Main -->
+        <div class="main">
+            <div class="topbar">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">A</div>
+                    <div>
+                        <div class="user-name" id="userName">Cargando...</div>
+                        <div class="user-role" id="userRole">...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content">
+                <!-- Dashboard Section -->
+                <div id="dashboardSection">
+                    <h1 style="font-size: 24px; color: #004A83; margin-bottom: 8px;">Panel Principal</h1>
+                    <p style="color: #666; margin-bottom: 24px;">Bienvenido al sistema de gestión de tickets</p>
+                    
+                    <div class="stats-grid" id="statsGrid">
+                        <div class="loading"><div class="spinner"></div>Cargando estadísticas...</div>
+                    </div>
+                    
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">Tickets Recientes</h3>
+                            <button class="btn btn-primary btn-sm" onclick="showSection('tickets')">Ver todos →</button>
+                        </div>
+                        <div id="recentTickets">
+                            <div class="loading"><div class="spinner"></div>Cargando tickets...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tickets Section -->
+                <div id="ticketsSection" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                        <div>
+                            <h1 style="font-size: 24px; color: #004A83;">Tickets</h1>
+                            <p style="color: #666; font-size: 14px;" id="ticketsCount">Cargando...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="panel">
+                        <div id="allTickets">
+                            <div class="loading"><div class="spinner"></div>Cargando tickets...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Knowledge Section -->
+                <div id="knowledgeSection" style="display: none;">
+                    <h1 style="font-size: 24px; color: #004A83; margin-bottom: 8px;">Base de Conocimiento Interna</h1>
+                    <p style="color: #666; margin-bottom: 24px;">Artículos y procedimientos para el equipo de soporte</p>
+                    <div class="panel">
+                        <div id="internalArticles">
+                            <div class="loading"><div class="spinner"></div>Cargando artículos...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Ticket Detail Modal -->
+    <div class="modal-overlay" id="ticketModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Detalle del Ticket</h3>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <div class="loading"><div class="spinner"></div>Cargando...</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentUser = null;
+        let allTickets = [];
+        
+        // Verificar autenticación
+        async function checkAuth() {
+            try {
+                const response = await fetch('api/index.php?action=me');
+                const result = await response.json();
+                
+                if (!result.authenticated) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                currentUser = result.user;
+                document.getElementById('userName').textContent = currentUser.full_name;
+                document.getElementById('userRole').textContent = currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1);
+                document.getElementById('userAvatar').textContent = currentUser.full_name.charAt(0).toUpperCase();
+                
+                loadDashboard();
+            } catch (error) {
+                window.location.href = 'login.html';
+            }
+        }
+        
+        // Cargar dashboard
+        async function loadDashboard() {
+            try {
+                // Stats
+                const statsResponse = await fetch('api/index.php?action=stats');
+                const stats = await statsResponse.json();
+                
+                document.getElementById('statsGrid').innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #E8F4FD;">🎫</div>
+                        <div class="stat-value">${stats.total || 0}</div>
+                        <div class="stat-label">Total Tickets</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #E8EAF6;">📝</div>
+                        <div class="stat-value">${stats.new || 0}</div>
+                        <div class="stat-label">Nuevos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #FFF8E1;">⚙️</div>
+                        <div class="stat-value">${stats.in_progress || 0}</div>
+                        <div class="stat-label">En Proceso</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #E8F5E9;">✅</div>
+                        <div class="stat-value">${stats.resolved || 0}</div>
+                        <div class="stat-label">Resueltos</div>
+                    </div>
+                `;
+                
+                // Tickets
+                const ticketsResponse = await fetch('api/index.php?action=tickets');
+                allTickets = await ticketsResponse.json();
+                
+                renderTickets(allTickets.slice(0, 5), 'recentTickets');
+                renderTickets(allTickets, 'allTickets');
+                document.getElementById('ticketsCount').textContent = `${allTickets.length} tickets encontrados`;
+                
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        // Renderizar tickets
+        function renderTickets(tickets, containerId) {
+            const container = document.getElementById(containerId);
+            
+            if (tickets.length === 0) {
+                container.innerHTML = '<div class="empty-state">No hay tickets para mostrar</div>';
+                return;
+            }
+            
+            const statusLabels = {
+                'new': 'Nuevo', 'open': 'Abierto', 'assigned': 'Asignado',
+                'in_progress': 'En atención', 'waiting_requester': 'Esperando',
+                'resolved': 'Resuelto', 'closed': 'Cerrado'
+            };
+            
+            container.innerHTML = `
+                <table class="tickets-table">
+                    <thead>
+                        <tr>
+                            <th>Ticket</th>
+                            <th>Asunto</th>
+                            <th>Estado</th>
+                            <th>Prioridad</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tickets.map(t => `
+                            <tr onclick="viewTicket(${t.id})" style="cursor: pointer;">
+                                <td><span class="ticket-number">${t.ticket_number}</span></td>
+                                <td>
+                                    <div class="ticket-subject">${t.subject}</div>
+                                    <div class="ticket-requester">${t.requester_name}</div>
+                                </td>
+                                <td><span class="status-badge status-${t.status}">${statusLabels[t.status] || t.status}</span></td>
+                                <td><span class="priority-badge priority-${t.priority}">${t.priority}</span></td>
+                                <td style="font-size: 12px; color: #666;">${new Date(t.created_at).toLocaleDateString('es-CL')}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+        
+        // Ver detalle de ticket
+        async function viewTicket(id) {
+            document.getElementById('ticketModal').classList.add('active');
+            document.getElementById('modalBody').innerHTML = '<div class="loading"><div class="spinner"></div>Cargando...</div>';
+            
+            try {
+                const response = await fetch(`api/index.php?action=ticket_detail&id=${id}`);
+                const ticket = await response.json();
+                
+                const statusLabels = {
+                    'new': 'Nuevo', 'open': 'Abierto', 'assigned': 'Asignado',
+                    'in_progress': 'En atención', 'waiting_requester': 'Esperando',
+                    'resolved': 'Resuelto', 'closed': 'Cerrado'
+                };
+                
+                document.getElementById('modalTitle').textContent = `Ticket ${ticket.ticket_number}`;
+                document.getElementById('modalBody').innerHTML = `
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <div class="detail-label">Asunto</div>
+                            <div class="detail-value">${ticket.subject}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Estado</div>
+                            <div class="detail-value"><span class="status-badge status-${ticket.status}">${statusLabels[ticket.status]}</span></div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Prioridad</div>
+                            <div class="detail-value"><span class="priority-badge priority-${ticket.priority}">${ticket.priority}</span></div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Solicitante</div>
+                            <div class="detail-value">${ticket.requester_name}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Correo</div>
+                            <div class="detail-value">${ticket.requester_email}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Categoría</div>
+                            <div class="detail-value">${ticket.category_icon || ''} ${ticket.category_name || '-'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Creado</div>
+                            <div class="detail-value">${new Date(ticket.created_at).toLocaleString('es-CL')}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Asignado a</div>
+                            <div class="detail-value">${ticket.assigned_name || 'Sin asignar'}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 16px; background: #FAFAFA; border-radius: 8px;">
+                        <div class="detail-label">Descripción</div>
+                        <div style="margin-top: 8px; color: #333; line-height: 1.6;">${ticket.description}</div>
+                    </div>
+                    
+                    <div class="messages-section">
+                        <h4 style="margin-bottom: 12px; color: #004A83;">💬 Comunicaciones</h4>
+                        ${ticket.messages && ticket.messages.length > 0 ? 
+                            ticket.messages.map(msg => `
+                                <div class="message message-${msg.type}">
+                                    <div class="message-header">
+                                        <span class="message-author">
+                                            ${msg.author_name}
+                                            ${msg.type === 'internal' ? '<span class="internal-badge">Interna</span>' : ''}
+                                        </span>
+                                        <span class="message-date">${new Date(msg.created_at).toLocaleString('es-CL')}</span>
+                                    </div>
+                                    <div class="message-content">${msg.content}</div>
+                                </div>
+                            `).join('') :
+                            '<p style="color: #999; font-size: 13px;">No hay mensajes aún</p>'
+                        }
+                        
+                        <div class="reply-form">
+                            <textarea id="replyContent" placeholder="Escriba una respuesta..."></textarea>
+                            <div class="reply-actions">
+                                <div class="reply-type">
+                                    <button class="active" id="btnPublic" onclick="setReplyType('public')">Pública</button>
+                                    <button id="btnInternal" onclick="setReplyType('internal')">Interna</button>
+                                </div>
+                                <button class="btn btn-primary" onclick="sendReply(${ticket.id})">Enviar</button>
+                                <select id="statusChange" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #e0e0e0; font-size: 12px; margin-left: auto;">
+                                    <option value="">Cambiar estado...</option>
+                                    <option value="new">Nuevo</option>
+                                    <option value="open">Abierto</option>
+                                    <option value="assigned">Asignado</option>
+                                    <option value="in_progress">En atención</option>
+                                    <option value="resolved">Resuelto</option>
+                                    <option value="closed">Cerrado</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('modalBody').innerHTML = '<div class="empty-state">Error al cargar el ticket</div>';
+            }
+        }
+        
+        let replyType = 'public';
+        function setReplyType(type) {
+            replyType = type;
+            document.getElementById('btnPublic').classList.toggle('active', type === 'public');
+            document.getElementById('btnInternal').classList.toggle('active', type === 'internal');
+        }
+        
+        async function sendReply(ticketId) {
+            const content = document.getElementById('replyContent').value;
+            if (!content.trim()) return;
+            
+            try {
+                await fetch('api/index.php?action=add_message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ticket_id: ticketId, content, type: replyType })
+                });
+                
+                // Cambiar estado si se seleccionó
+                const statusChange = document.getElementById('statusChange').value;
+                if (statusChange) {
+                    await fetch('api/index.php?action=change_status', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ticket_id: ticketId, status: statusChange })
+                    });
+                }
+                
+                viewTicket(ticketId);
+                loadDashboard();
+            } catch (error) {
+                alert('Error al enviar respuesta');
+            }
+        }
+        
+        function closeModal() {
+            document.getElementById('ticketModal').classList.remove('active');
+        }
+        
+        function showSection(section) {
+            document.getElementById('dashboardSection').style.display = section === 'dashboard' ? 'block' : 'none';
+            document.getElementById('ticketsSection').style.display = section === 'tickets' ? 'block' : 'none';
+            document.getElementById('knowledgeSection').style.display = section === 'knowledge' ? 'block' : 'none';
+            
+            document.querySelectorAll('.nav-item').forEach((item, i) => {
+                item.classList.toggle('active', (i === 0 && section === 'dashboard') || (i === 1 && section === 'tickets') || (i === 2 && section === 'knowledge'));
+            });
+            
+            if (section === 'knowledge') loadInternalArticles();
+        }
+        
+        async function loadInternalArticles() {
+            try {
+                const response = await fetch('api/index.php?action=internal_articles');
+                const articles = await response.json();
+                
+                const container = document.getElementById('internalArticles');
+                if (articles.length === 0) {
+                    container.innerHTML = '<div class="empty-state">No hay artículos internos</div>';
+                    return;
+                }
+                
+                container.innerHTML = articles.map(a => `
+                    <div style="padding: 16px 20px; border-bottom: 1px solid #f5f5f5;">
+                        <h4 style="color: #333; margin-bottom: 4px;">${a.title}</h4>
+                        <p style="color: #666; font-size: 13px;">${a.summary || ''}</p>
+                        <div style="font-size: 11px; color: #999; margin-top: 8px;">
+                            ${a.category_name || 'Sin categoría'} • 👁️ ${a.views} vistas
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                document.getElementById('internalArticles').innerHTML = '<div class="empty-state">Error al cargar artículos</div>';
+            }
+        }
+        
+        async function logout() {
+            await fetch('api/index.php?action=logout');
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+        
+        // Iniciar
+        checkAuth();
+    </script>
+</body>
+</html>

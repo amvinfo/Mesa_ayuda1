@@ -1,0 +1,91 @@
+╔════════════════════════════════════════════════════════════╗
+║                                                            ║
+║     🏥 MESA DE AYUDA - GUÍA RÁPIDA PARA CPANEL            ║
+║                                                            ║
+╚════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PASOS PARA INSTALAR EN CPANEL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PASO 1: Crear Base de Datos en cPanel
+   → cPanel → Bases de Datos MySQL
+   → Crear BD: mesadeayuda
+   → Crear usuario con contraseña segura
+   → Asignar TODOS LOS PRIVILEGIOS al usuario
+   → ANOTA: nombre BD, usuario, contraseña
+
+PASO 2: Subir Archivos
+   → cPanel → Administrador de Archivos
+   → Ve a public_html (o subdirectorio deseado)
+   → Comprime la carpeta "cpanel/" en ZIP
+   → Sube el ZIP y extráelo
+   → Asegúrate que index.html esté en la raíz
+
+PASO 3: Ejecutar Instalador
+   → Abre: https://tudominio.com/install.php
+   → Paso 1: Clic en "Comenzar Instalación"
+   → Paso 2: Ingresa datos de la BD
+   → Paso 3: Clic en "Instalar Base de Datos"
+   → Paso 4: Clic en "Ir al Sitio"
+
+PASO 4: Acceder al Sistema
+   → https://tudominio.com/
+   → Clic en "Iniciar Sesión"
+   → Usuario: admin / Contraseña: admin123
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ESTRUCTURA DE ARCHIVOS A SUBIR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+public_html/
+├── index.html          ← Portal público
+├── login.html          ← Login funcionarios
+├── dashboard.html      ← Panel interno
+├── install.php         ← Instalador (BORRAR después)
+├── db.php              ← Conexión BD
+├── database.sql        ← Script SQL
+├── .htaccess           ← Configuración Apache
+└── api/
+    └── index.php       ← API del sistema
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  CREDENCIALES INICIALES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   Administrador: admin / admin123
+   Supervisor:    supervisor / admin123
+   Técnico:       tecnico / admin123
+
+   ⚠️ CAMBIA LAS CONTRASEÑAS INMEDIATAMENTE
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  DESPUÉS DE INSTALAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   ✅ Elimina install.php (por seguridad)
+   ✅ Cambia las contraseñas de los usuarios
+   ✅ Activa HTTPS/SSL (gratis en cPanel)
+   ✅ Verifica permisos: archivos 644, carpetas 755
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  PROBLEMAS COMUNES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ Error de conexión a BD:
+   → Verifica nombre completo (incluye prefijo cPanel)
+   → Verifica usuario y contraseña
+   → Host generalmente es: localhost
+
+❌ Página en blanco:
+   → Verifica versión PHP (mínimo 7.4)
+   → Revisa log de errores en cPanel
+   → Verifica que todos los archivos se subieron
+
+❌ Error 404:
+   → Verifica que .htaccess existe
+   → Asegúrate que mod_rewrite está activo
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📖 Guía completa: cpanel/INSTALACION-CPANEL.md
