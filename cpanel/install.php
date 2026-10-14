@@ -1,6 +1,6 @@
 <?php
 /**
- * Mesa de Ayuda - Instalador
+ * Mesa de Ayuda - Instalador (Versión Flexible)
  * Gobierno de Chile
  */
 
@@ -11,6 +11,24 @@ ini_set('display_errors', 1);
 $step = isset($_GET['step']) ? intval($_GET['step']) : 1;
 $error = '';
 $success = '';
+
+// Función para encontrar database.sql
+function findDatabaseSQL() {
+    $possible_paths = [
+        __DIR__ . '/database.sql',
+        __DIR__ . '/../database.sql',
+        __DIR__ . '/cpanel/database.sql',
+        dirname(__DIR__) . '/database.sql',
+    ];
+    
+    foreach ($possible_paths as $path) {
+        if (file_exists($path)) {
+            return $path;
+        }
+    }
+    
+    return false;
+}
 
 // Procesar formularios
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -59,6 +77,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $config = $_SESSION['db_config'];
                 
+                // Buscar archivo SQL
+                $sql_file = findDatabaseSQL();
+                
+                if ($sql_file === false) {
+                    throw new Exception('No se encontró el archivo database.sql. Verifique que todos los archivos estén en la misma carpeta.');
+                }
+                
                 // Conectar usando mysqli
                 $conn = new mysqli($config['host'], $config['user'], $config['pass'], $config['name']);
                 
@@ -70,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $conn->set_charset("utf8mb4");
                 
                 // Leer archivo SQL
-                $sql = file_get_contents(__DIR__ . '/database.sql');
+                $sql = file_get_contents($sql_file);
                 
                 if ($sql === false) {
                     throw new Exception('No se pudo leer el archivo database.sql');
@@ -95,7 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 $conn->close();
                 
-                // Crear archivo de configuración
+                // Crear archivo de configuración en la misma ubicación que install.php
                 $config_content = "<?php\n";
                 $config_content .= "// Configuración generada automáticamente el " . date('Y-m-d H:i:s') . "\n";
                 $config_content .= "// NO MODIFICAR ESTE ARCHIVO MANUALMENTE\n\n";
@@ -107,7 +132,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $config_content .= "define('INSTALLED', true);\n";
                 $config_content .= "define('INSTALL_DATE', '" . date('Y-m-d H:i:s') . "');\n";
                 
-                if (file_put_contents(__DIR__ . '/config.php', $config_content) === false) {
+                $config_file = __DIR__ . '/config.php';
+                if (file_put_contents($config_file, $config_content) === false) {
                     throw new Exception('No se pudo crear el archivo config.php. Verifique los permisos de la carpeta.');
                 }
                 
@@ -294,7 +320,7 @@ if (file_exists(__DIR__ . '/config.php')) {
             margin-bottom: 10px;
             font-size: 16px;
         }
-        .warning-box p {
+        .warning-box p, .warning-box ol {
             color: #666;
             line-height: 1.6;
         }
@@ -382,6 +408,7 @@ if (file_exists(__DIR__ . '/config.php')) {
                         <li>PHP Version: <?php echo phpversion(); ?> <?php echo version_compare(phpversion(), '7.4.0', '>=') ? '✓' : '✗'; ?></li>
                         <li>MySQLi: <?php echo extension_loaded('mysqli') ? '✓ Habilitado' : '✗ No habilitado'; ?></li>
                         <li>Permisos de escritura: <?php echo is_writable(__DIR__) ? '✓ OK' : '✗ Sin permisos'; ?></li>
+                        <li>Archivo SQL: <?php echo findDatabaseSQL() ? '✓ Encontrado' : '✗ No encontrado'; ?></li>
                     </ul>
                 </div>
                 
