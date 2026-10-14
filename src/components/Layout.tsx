@@ -7,28 +7,31 @@ import { Menu, X, Home, LayoutDashboard, Ticket, BookOpen, Settings, LogOut, Use
 export function PublicLayout({ children }: { children: React.ReactNode }) {
   const settings = db.getSettings();
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <header className="bg-white shadow-sm border-b sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Link to="/" className="flex items-center gap-2">
-              <span className="text-3xl">{settings.logo}</span>
+            <Link to="/" className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white text-xl font-bold">
+                {settings.logo}
+              </div>
               <div>
-                <h1 className="text-lg font-bold text-gray-900">{settings.systemName}</h1>
+                <h1 className="text-base font-bold text-gray-900 leading-tight">{settings.systemName}</h1>
                 <p className="text-xs text-gray-500">{settings.institutionName}</p>
               </div>
             </Link>
-            <nav className="flex items-center gap-4">
-              <Link to="/" className="text-gray-600 hover:text-blue-600 text-sm font-medium">Inicio</Link>
-              <Link to="/knowledge" className="text-gray-600 hover:text-blue-600 text-sm font-medium">Base de Conocimiento</Link>
-              <Link to="/tickets" className="text-gray-600 hover:text-blue-600 text-sm font-medium hidden sm:inline">Mis Tickets</Link>
-              <Link to="/login" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition">Iniciar Sesión</Link>
+            <nav className="flex items-center gap-1 sm:gap-2">
+              <Link to="/" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-50 transition">Inicio</Link>
+              <Link to="/knowledge" className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-50 transition">Base de Conocimiento</Link>
+              <Link to="/login" className="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition ml-2">
+                Iniciar Sesión
+              </Link>
             </nav>
           </div>
         </div>
       </header>
-      <main>{children}</main>
-      <footer className="bg-white border-t mt-12 py-6">
+      <main className="flex-1">{children}</main>
+      <footer className="bg-white border-t mt-auto py-6">
         <div className="max-w-7xl mx-auto px-4 text-center text-sm text-gray-500">
           <p>© {new Date().getFullYear()} {settings.institutionName} - {settings.systemName}</p>
           <p className="mt-1">Contacto: {settings.contactEmail} | {settings.contactPhone}</p>
@@ -64,8 +67,10 @@ export function InternalLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-gray-100 flex">
       {/* Sidebar */}
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:in-auto ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="flex items-center gap-2 p-4 border-b">
-          <span className="text-2xl">{settings.logo}</span>
+        <div className="flex items-center gap-3 p-4 border-b">
+          <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white text-xl font-bold">
+            {settings.logo}
+          </div>
           <div>
             <h2 className="font-bold text-gray-900 text-sm">{settings.systemName}</h2>
             <p className="text-xs text-gray-500">{settings.institutionName}</p>
@@ -77,7 +82,7 @@ export function InternalLayout({ children }: { children: React.ReactNode }) {
               key={item.path}
               to={item.path}
               onClick={() => setSidebarOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition ${
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${
                 location.pathname.startsWith(item.path)
                   ? 'bg-blue-50 text-blue-700'
                   : 'text-gray-600 hover:bg-gray-100'
@@ -89,7 +94,7 @@ export function InternalLayout({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t">
-          <button onClick={handleLogout} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 w-full transition">
+          <button onClick={handleLogout} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 w-full transition">
             <LogOut size={18} />
             Cerrar Sesión
           </button>
@@ -118,7 +123,7 @@ export function InternalLayout({ children }: { children: React.ReactNode }) {
               <ChevronDown size={14} className="text-gray-400" />
             </button>
             {userMenuOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border py-1 z-50">
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border py-1 z-50">
                 <div className="px-4 py-2 border-b">
                   <p className="text-sm font-medium">{user?.fullName}</p>
                   <p className="text-xs text-gray-500">{user?.email}</p>
