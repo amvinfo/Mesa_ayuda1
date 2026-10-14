@@ -2,9 +2,6 @@
 /**
  * Mesa de Ayuda - Instalador
  * Gobierno de Chile
- * 
- * IMPORTANTE: En cPanel, la base de datos debe crearse previamente
- * desde el panel de control (Bases de Datos MySQL).
  */
 
 session_start();
@@ -35,37 +32,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'pass' => $db_pass
             ];
             
-            // Probar conexión a la BD (NO crear, solo conectar)
-            try {
-                $pdo = new PDO(
-                    "mysql:host=$db_host;dbname=$db_name;charset=utf8mb4", 
-                    $db_user, 
-                    $db_pass,
-                    [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-                );
-                
-                // Verificar que la BD existe y está accesible
-                $stmt = $pdo->query("SELECT DATABASE()");
-                $currentDb = $stmt->fetchColumn();
-                
-                if ($currentDb !== $db_name) {
-                    $error = "Conexión exitosa pero la base de datos actual ($currentDb) no coincide con la especificada ($db_name).";
-                } else {
-                    $step = 3;
-                }
-                
-            } catch (PDOException $e) {
-                $errorMsg = $e->getMessage();
+            // Probar conexión usando mysqli
+            $conn = @new mysqli($db_host, $db_user, $db_pass, $db_name);
+            
+            if ($conn->connect_error) {
+                $errorMsg = $conn->connect_error;
                 
                 if (strpos($errorMsg, 'Access denied') !== false) {
                     $error = 'Acceso denegado. Verifique que el usuario y contraseña sean correctos, y que el usuario tenga permisos sobre la base de datos.';
                 } elseif (strpos($errorMsg, 'Unknown database') !== false) {
                     $error = "La base de datos '$db_name' no existe. Por favor, créela primero desde cPanel → Bases de Datos MySQL.";
-                } elseif (strpos($errorMsg, "Can't connect") !== false || strpos($errorMsg, 'Connection refused') !== false) {
-                    $error = 'No se puede conectar al servidor MySQL. Verifique el host (generalmente es "localhost" en cPanel).';
                 } else {
                     $error = 'Error de conexión: ' . $errorMsg;
                 }
+            } else {
+                $conn->close();
+                $step = 3;
             }
         }
     } elseif ($step === 3) {
@@ -76,31 +58,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             try {
                 $config = $_SESSION['db_config'];
-                $pdo = new PDO(
-                    "mysql:host={$config['host']};dbname={$config['name']};charset=utf8mb4", 
-                    $config['user'], 
-                    $config['pass'],
-                    [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-                );
                 
-                // Leer y ejecutar SQL
+                // Conectar usando mysqli
+                $conn = new mysqli($config['host'], $config['user'], $config['pass'], $config['name']);
+                
+                if ($conn->connect_error) {
+                    throw new Exception('Error de conexión: ' . $conn->connect_error);
+                }
+                
+                // Establecer charset
+                $conn->set_charset("utf8mb4");
+                
+                // Leer archivo SQL
                 $sql = file_get_contents(__DIR__ . '/database.sql');
                 
-                // Ejecutar cada statement por separado
-                $statements = array_filter(array_map('trim', explode(';', $sql)));
-                
-                foreach ($statements as $statement) {
-                    if (!empty($statement) && !preg_match('/^--/', $statement)) {
-                        try {
-                            $pdo->exec($statement);
-                        } catch (PDOException $e) {
-                            // Ignorar errores de DROP TABLE si no existe
-                            if (strpos($e->getMessage(), 'Unknown table') === false) {
-                                throw $e;
-                            }
-                        }
-                    }
+                if ($sql === false) {
+                    throw new Exception('No se pudo leer el archivo database.sql');
                 }
+                
+                // Ejecutar todo el script SQL de una vez
+                if (!$conn->multi_query($sql)) {
+                    throw new Exception('Error al ejecutar SQL: ' . $conn->error);
+                }
+                
+                // Esperar a que terminen todos los queries
+                do {
+                    if ($result = $conn->store_result()) {
+                        $result->free();
+                    }
+                } while ($conn->more_results() && $conn->next_result());
+                
+                // Verificar si hubo errores
+                if ($conn->error) {
+                    throw new Exception('Error en SQL: ' . $conn->error);
+                }
+                
+                $conn->close();
                 
                 // Crear archivo de configuración
                 $config_content = "<?php\n";
@@ -118,7 +111,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     throw new Exception('No se pudo crear el archivo config.php. Verifique los permisos de la carpeta.');
                 }
                 
-                // Marcar como instalado
+                // Marcar como instalado usando PDO
+                $pdo = new PDO(
+                    "mysql:host={$config['host']};dbname={$config['name']};charset=utf8mb4", 
+                    $config['user'], 
+                    $config['pass'],
+                    [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+                );
                 $pdo->exec("UPDATE settings SET value = '1' WHERE key_name = 'installed'");
                 
                 $step = 4;
@@ -127,8 +126,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Limpiar sesión
                 unset($_SESSION['db_config']);
                 
-            } catch (PDOException $e) {
-                $error = 'Error al instalar base de datos: ' . $e->getMessage();
             } catch (Exception $e) {
                 $error = $e->getMessage();
             }
@@ -360,7 +357,7 @@ if (file_exists(__DIR__ . '/config.php')) {
                     <ul>
                         <li>PHP 7.4 o superior</li>
                         <li>MySQL 5.7 o superior / MariaDB 10.3+</li>
-                        <li>Extensión PDO MySQL habilitada</li>
+                        <li>Extensión MySQLi habilitada</li>
                         <li>Permisos de escritura en el directorio</li>
                     </ul>
                 </div>
@@ -383,7 +380,7 @@ if (file_exists(__DIR__ . '/config.php')) {
                     <h3>✅ Verificación del Sistema</h3>
                     <ul>
                         <li>PHP Version: <?php echo phpversion(); ?> <?php echo version_compare(phpversion(), '7.4.0', '>=') ? '✓' : '✗'; ?></li>
-                        <li>PDO MySQL: <?php echo extension_loaded('pdo_mysql') ? '✓ Habilitado' : '✗ No habilitado'; ?></li>
+                        <li>MySQLi: <?php echo extension_loaded('mysqli') ? '✓ Habilitado' : '✗ No habilitado'; ?></li>
                         <li>Permisos de escritura: <?php echo is_writable(__DIR__) ? '✓ OK' : '✗ Sin permisos'; ?></li>
                     </ul>
                 </div>
