@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mesa de Ayuda - Verificación</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #004A83;
+            margin-bottom: 10px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #E8F5E9;
+            border: 2px solid #4CAF50;
+            color: #2E7D32;
+        }
+        .info {
+            background: #E8F4FD;
+            border: 2px solid #0066B3;
+            color: #004A83;
+        }
+        .warning {
+            background: #FFF8E1;
+            border: 2px solid #F57F17;
+            color: #F57F17;
+        }
+        code {
+            background: #f5f5f5;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .button {
+            display: inline-block;
+            background: #0066B3;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            margin: 10px 5px;
+            font-weight: bold;
+        }
+        .button:hover {
+            background: #004A83;
+        }
+        ul {
+            line-height: 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏥 Mesa de Ayuda</h1>
+        <p>Sistema de Soporte Técnico - Gobierno de Chile</p>
+        
+        <div class="status success">
+            <strong>✅ ¡Servidor funcionando correctamente!</strong>
+        </div>
+
+        <div class="status info">
+            <h3>📋 Instrucciones para ver el sitio completo:</h3>
+            <ol>
+                <li>Ejecuta el comando: <code>npm run build</code></li>
+                <li>Los archivos se generarán en la carpeta <code>dist/</code></li>
+                <li>Copia el contenido de <code>dist/</code> a tu servidor web</li>
+                <li>Accede al sitio desde tu navegador</li>
+            </ol>
+        </div>
+
+        <h3>🚀 Opciones para ver el sitio:</h3>
+        
+        <h4>Opción 1: Servidor de desarrollo (Recomendado)</h4>
+        <div class="status info">
+            <code>npm run dev</code><br>
+            Luego abre: <a href="http://localhost:3000" target="_blank">http://localhost:3000</a>
+        </div>
+
+        <h4>Opción 2: XAMPP</h4>
+        <div class="status info">
+            <ol>
+                <li>Copia la carpeta <code>dist/</code> a <code>C:\xampp\htdocs\mesadeayuda\</code></li>
+                <li>Inicia Apache en XAMPP</li>
+                <li>Abre: <a href="http://localhost/mesadeayuda/" target="_blank">http://localhost/mesadeayuda/</a></li>
+            </ol>
+        </div>
+
+        <h4>Opción 3: Servidor Python (Simple)</h4>
+        <div class="status info">
+            <code>cd dist && python -m http.server 8000</code><br>
+            Luego abre: <a href="http://localhost:8000" target="_blank">http://localhost:8000</a>
+        </div>
+
+        <div class="status warning">
+            <h3>🔐 Credenciales de prueba:</h3>
+            <ul>
+                <li><strong>Administrador:</strong> admin / admin123</li>
+                <li><strong>Supervisor:</strong> supervisor / admin123</li>
+                <li><strong>Técnico:</strong> tecnico / admin123</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="http://localhost:3000" class="button">Ir al Sitio (Dev)</a>
+            <a href="GUIA-RAPIDA.md" class="button">Ver Guía Completa</a>
+        </div>
+    </div>
+</body>
+</html>
