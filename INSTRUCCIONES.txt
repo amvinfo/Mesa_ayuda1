@@ -1,0 +1,119 @@
+╔══════════════════════════════════════════════════════════╗
+║                                                          ║
+║     🏥 MESA DE AYUDA - GUÍA DE INSTALACIÓN RÁPIDA       ║
+║                                                          ║
+╚══════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  OPCIÓN A: VER EN XAMPP (RECOMENDADO) ⭐
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PASO 1: Instalar XAMPP
+   → Descarga desde: https://www.apachefriends.org/
+   → Instálalo normalmente (siguiente, siguiente, finalizar)
+
+PASO 2: Iniciar Apache
+   → Abre el "Panel de Control de XAMPP"
+   → Haz clic en el botón "Start" al lado de "Apache"
+   → Debe aparecer fondo VERDE (significa que funciona)
+
+PASO 3: Copiar archivos
+   → Abre el Explorador de Windows
+   → Ve a: C:\xampp\htdocs\
+   → Crea una carpeta llamada: mesadeayuda
+   → Copia DENTRO de esa carpeta estos archivos:
+     
+     ✅ index.html
+     ✅ .htaccess  
+     ✅ Carpeta "assets" (completa con todo su contenido)
+
+   La estructura debe quedar así:
+   
+   C:\xampp\htdocs\mesadeayuda\
+   ├── index.html
+   ├── .htaccess
+   └── assets\
+       ├── index-XXXXX.js
+       └── index-XXXXX.css
+
+PASO 4: Abrir en el navegador
+   → Abre Chrome, Firefox o Edge
+   → En la barra de direcciones escribe:
+   
+   👉 http://localhost/mesadeayuda/
+   
+   ¡Y listo! Ya puedes usar el sistema.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  OPCIÓN B: VER DIRECTAMENTE EN EL NAVEGADOR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Si NO quieres instalar XAMPP:
+
+1. Busca el archivo "index.html" en la carpeta "dist"
+2. Haz DOBLE CLIC sobre él
+3. Se abrirá en tu navegador
+
+⚠️ NOTA: Algunas funciones pueden no funcionar correctamente
+   al abrir el archivo directamente. Se recomienda XAMPP.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  OPCIÓN C: USAR PYTHON (MUY FÁCIL)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Si tienes Python instalado:
+
+1. Abre una terminal (CMD o PowerShell)
+2. Ve a la carpeta del proyecto
+3. Ejecuta estos comandos:
+
+   cd dist
+   python -m http.server 8000
+
+4. Abre el navegador en: http://localhost:8000
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🔐 CREDENCIALES PARA INGRESAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Una vez en el sitio, haz clic en "Iniciar Sesión" y usa:
+
+   ┌──────────────┬────────────┬──────────────────┐
+   │ ROL          │ USUARIO    │ CONTRASEÑA       │
+   ├──────────────┼────────────┼──────────────────┤
+   │ Administrador│ admin      │ admin123         │
+   │ Supervisor   │ supervisor │ admin123         │
+   │ Técnico      │ tecnico    │ admin123         │
+   └──────────────┴────────────┴──────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ❓ PROBLEMAS COMUNES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ PÁGINA EN BLANCO
+   → Verifica que Apache esté corriendo (verde en XAMPP)
+   → Asegúrate de usar: http://localhost/mesadeayuda/
+   → Revisa que index.html esté en la carpeta correcta
+
+❌ ERROR 404 (No encontrado)
+   → Verifica que .htaccess esté en la carpeta mesadeayuda
+   → Reinicia Apache en XAMPP (Stop y luego Start)
+
+❌ PUERTO 80 OCUPADO
+   → Cierra Skype u otros programas que usen el puerto 80
+   → O cambia el puerto de Apache a 8080 en XAMPP
+   → Accede con: http://localhost:8080/mesadeayuda/
+
+❌ NO SE VEN LOS ESTILOS (se ve sin formato)
+   → Verifica que la carpeta "assets" esté completa
+   → Asegúrate de que .htaccess esté presente
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📞 ¿NECESITAS MÁS AYUDA?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Revisa los archivos:
+   → README.md (Guía completa)
+   → GUIA-RAPIDA.md (Guía resumida)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
